@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ride Profit</title>
+<style>
+:root{--bg:#eef1ee;--card:#fff;--ink:#14201a;--mute:#5d6b63;--line:#d8dfda;--good:#11803f;--ok:#b7791f;--bad:#c0392b;--gbg:#e3f4ea;--obg:#fbf1dc;--bbg:#fbe4e1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1411;--card:#172019;--ink:#eef3ef;--mute:#9aa9a0;--line:#2a372e;--good:#3ecf7a;--ok:#e3b341;--bad:#ff6b5b;--gbg:#12301f;--obg:#33290f;--bbg:#3a1a16}}
+:root[data-theme="dark"]{--bg:#0e1411;--card:#172019;--ink:#eef3ef;--mute:#9aa9a0;--line:#2a372e;--good:#3ecf7a;--ok:#e3b341;--bad:#ff6b5b;--gbg:#12301f;--obg:#33290f;--bbg:#3a1a16}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:480px;margin:0 auto;padding:12px 14px calc(84px + env(safe-area-inset-bottom,0px))}
+section{display:none}section.on{display:block}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.hero{text-align:center;padding:14px 10px;border-radius:16px;margin-bottom:12px;border:2px solid var(--line);background:var(--card)}
+.hero.good{background:var(--gbg);border-color:var(--good)}.hero.ok{background:var(--obg);border-color:var(--ok)}.hero.bad{background:var(--bbg);border-color:var(--bad)}
+.v{font-size:18px;font-weight:800}
+.big{font-size:clamp(28px,9vw,40px);font-weight:800;line-height:1.1;margin:2px 0}
+.sub{color:var(--mute);font-size:13px}
+.good .v,.good .big,.t-good{color:var(--good)}.ok .v,.ok .big,.t-ok{color:var(--ok)}.bad .v,.bad .big,.t-bad{color:var(--bad)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+label{display:block;font-size:12px;color:var(--mute);margin-bottom:3px}
+input{width:100%;font:inherit;font-size:22px;font-weight:700;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input:focus{outline:2px solid var(--ink);outline-offset:1px}input:disabled{opacity:.6}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:16px;cursor:pointer;color:#fff;font-size:17px}
+button:disabled{opacity:.35}
+.acc{background:var(--good)}.skp{background:var(--bad)}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 12px;font-size:14px}
+.mini{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--mute);margin-top:8px;justify-content:center}
+h2{font-size:16px;margin:0}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.item{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:transparent;color:var(--ink);border:0;border-top:1px solid var(--line);border-radius:0;padding:11px 2px;font-weight:500;font-size:15px}
+.item:first-child{border-top:0}.item b{font-size:16px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;margin-right:6px}
+.badge.a{background:var(--gbg);color:var(--good)}.badge.s{background:var(--bbg);color:var(--bad)}
+.note{font-size:12px;color:var(--mute);margin-top:8px}
+.sum{text-align:center}.sum .big{font-size:clamp(24px,8vw,34px)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:7px 0;border-bottom:1px solid var(--line)}td:last-child{text-align:right;font-weight:600}tr:last-child td{border-bottom:0}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;background:transparent;color:var(--mute);border-radius:0;padding:14px 4px;font-size:14px}
+nav button.on{color:var(--ink);box-shadow:inset 0 3px 0 var(--good)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:9}.modal.on{display:flex}
+.sheet{background:var(--card);width:100%;max-width:480px;max-height:88%;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.acts{display:flex;gap:8px;margin-top:12px}.acts button{flex:1;padding:11px;font-size:15px}
+.set input{font-size:18px}
+</style>
+</head>
+<body>
+<main>
+
+<section id="t-calc" class="on">
+  <div class="hero" id="hero" aria-live="polite"><div class="sub">Type the fare and distances</div></div>
+  <div class="panel">
+    <div class="grid">
+      <div class="full"><label for="fare">Fare shown</label><input id="fare" type="number" inputmode="decimal" enterkeyhint="next" placeholder="0"></div>
+      <div><label for="pick">Km to pickup</label><input id="pick" type="number" inputmode="decimal" enterkeyhint="next" placeholder="0"></div>
+      <div><label for="trip">Km of trip</label><input id="trip" type="number" inputmode="decimal" enterkeyhint="next" placeholder="0"></div>
+      <div class="full"><label for="extra">Other charges (toll, parking)</label><input id="extra" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0"></div>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <button class="acc" id="bAcc" disabled>Accepted</button>
+      <button class="skp" id="bSkp" disabled>Skipped</button>
+    </div>
+    <div class="mini" id="mini"></div>
+  </div>
+</section>
+
+<section id="t-rides">
+  <div class="panel sum"><div class="sub" id="todayN">Today</div><div class="big" id="todayP">0.00</div><div class="sub">Profit from accepted rides</div></div>
+  <div class="panel">
+    <div class="head"><h2>Rides</h2><button class="ghost" id="bClr">Clear all</button></div>
+    <div id="list"></div>
+  </div>
+</section>
+
+<section id="t-set">
+  <div class="panel set">
+    <div class="head"><h2>My car settings</h2><button class="ghost" id="bEdit">Edit</button></div>
+    <div class="grid">
+      <div><label for="price">Fuel price per litre</label><input id="price" type="number" inputmode="decimal"></div>
+      <div><label for="eff">Km per litre</label><input id="eff" type="number" inputmode="decimal"></div>
+      <div><label for="wear">Wear cost per km</label><input id="wear" type="number" inputmode="decimal"></div>
+      <div><label for="min">Minimum profit per km</label><input id="min" type="number" inputmode="decimal"></div>
+      <div><label for="feeMin">Uber fee % (min)</label><input id="feeMin" type="number" inputmode="decimal"></div>
+      <div><label for="feeMax">Uber fee % (max)</label><input id="feeMax" type="number" inputmode="decimal"></div>
+    </div>
+    <div class="note">Locked so they don't change by accident. Tap Edit, change, then Save. Profit is shown as a range: best case uses the lowest fee, worst case uses the highest. Set both fees to 0 if the fare shown is already what you receive.</div>
+  </div>
+</section>
+
+</main>
+
+<nav>
+  <button data-tab="calc" class="on">Calculate</button>
+  <button data-tab="rides">Rides</button>
+  <button data-tab="set">Settings</button>
+</nav>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEYS=['price','eff','wear','min','feeMin','feeMax'];
+let rides=[],locked=false,sel=null,cur=null;
+const num=id=>parseFloat($(id).value)||0;
+const f=(v,d=2)=>Number(v).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+const rng=(a,b,d=2)=>Math.abs(a-b)<0.005?f(a,d):f(a,d)+' – '+f(b,d);
+function get(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
+function put(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+function S(){const s={};KEYS.forEach(k=>s[k]=parseFloat($(k).value)||0);if(s.feeMax<s.feeMin){[s.feeMin,s.feeMax]=[s.feeMax,s.feeMin]}return s}
+function compute(fare,pick,trip,extra,s){
+  const km=pick+trip,litres=s.eff?km/s.eff:0,fuel=litres*s.price,wear=km*s.wear;
+  const feeLo=fare*s.feeMin/100,feeHi=fare*s.feeMax/100;
+  const base=fare-extra-fuel-wear,pMax=base-feeLo,pMin=base-feeHi;
+  return{km,litres,fuel,wear,extra,fare,feeLo,feeHi,pMin,pMax,kMin:km?pMin/km:0,kMax:km?pMax/km:0};
+}
+function verdict(c,s){
+  if(c.pMax<=0||(s.min&&c.kMax<s.min))return['bad','Skip it'];
+  if(c.pMin>0&&(!s.min||c.kMin>=s.min))return['good','Accept'];
+  return['ok','Borderline'];
+}
+function calc(){
+  const s=S(),fare=num('fare'),pick=num('pick'),trip=num('trip'),extra=num('extra'),hero=$('hero');
+  cur=null;$('bAcc').disabled=$('bSkp').disabled=true;$('mini').innerHTML='';
+  if(!fare||!(pick+trip)){hero.className='hero';hero.innerHTML='<div class="sub">Type the fare and distances</div>';return}
+  if(!s.price||!s.eff){hero.className='hero';hero.innerHTML='<div class="sub">Fill in fuel price and km per litre in Settings first</div>';return}
+  const c=compute(fare,pick,trip,extra,s),[cls,txt]=verdict(c,s);
+  cur={c,s,cls};
+  hero.className='hero '+cls;
+  hero.innerHTML=`<div class="v">${txt}</div><div class="big">${rng(c.pMin,c.pMax)}</div><div class="sub">${rng(c.kMin,c.kMax)} per km · ${f(c.km,1)} km</div>`;
+  $('mini').innerHTML=`<span>Fuel ${f(c.fuel)} (${f(c.litres,3)} L)</span><span>Wear ${f(c.wear)}</span><span>Fee ${rng(c.feeLo,c.feeHi)}</span><span>Other ${f(c.extra)}</span>`;
+  $('bAcc').disabled=$('bSkp').disabled=false;
+}
+function saveRide(status){
+  if(!cur)return;
+  rides.unshift({id:Date.now(),status,cls:cur.cls,pick:num('pick'),trip:num('trip'),...cur.c,s:cur.s});
+  put('rt_rides',rides);
+  ['fare','pick','trip','extra'].forEach(k=>$(k).value='');
+  calc();render();$('fare').focus();
+}
+function norm(r){ // upgrade rides saved by older versions
+  if(r.pMin===undefined){r.pMin=r.pMax=r.profit;r.kMin=r.kMax=r.ppk;r.feeLo=r.feeHi=r.fee||0;r.s=Object.assign({feeMin:r.s.fee||0,feeMax:r.s.fee||0},r.s)}
+  return r;
+}
+function render(){
+  const day=new Date().toDateString();
+  const t=rides.filter(r=>r.status==='accepted'&&new Date(r.id).toDateString()===day);
+  $('todayN').textContent=`Today · ${t.length} accepted`;
+  $('todayP').textContent=rng(t.reduce((a,r)=>a+r.pMin,0),t.reduce((a,r)=>a+r.pMax,0));
+  $('list').innerHTML=rides.length?rides.map(r=>`<button class="item" data-id="${r.id}"><span><span class="badge ${r.status==='accepted'?'a':'s'}">${r.status==='accepted'?'Accepted':'Skipped'}</span><span class="sub">${new Date(r.id).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})} · ${f(r.km,1)} km</span></span><b class="t-${r.cls}">${rng(r.pMin,r.pMax,0)}</b></button>`).join(''):'<div class="sub">No rides saved yet</div>';
+}
+function open(id){
+  const r=rides.find(x=>x.id==id);if(!r)return;sel=r;
+  $('sheet').innerHTML=`<div class="head"><h2>Ride details</h2><button class="ghost" id="mx">Close</button></div>
+  <div class="sub" style="margin-bottom:8px">${new Date(r.id).toLocaleString()} · ${r.status==='accepted'?'Accepted':'Skipped'}</div>
+  <table>
+  <tr><td>Fare shown</td><td>${f(r.fare)}</td></tr>
+  <tr><td>Uber fee (${r.s.feeMin}–${r.s.feeMax}%)</td><td>− ${rng(r.feeLo,r.feeHi)}</td></tr>
+  <tr><td>Other charges</td><td>− ${f(r.extra)}</td></tr>
+  <tr><td>Km to pickup</td><td>${f(r.pick,1)} km</td></tr>
+  <tr><td>Km of trip</td><td>${f(r.trip,1)} km</td></tr>
+  <tr><td>Total distance</td><td>${f(r.km,1)} km</td></tr>
+  <tr><td>Fuel used (${r.s.eff} km/L)</td><td>${f(r.litres,3)} L</td></tr>
+  <tr><td>Fuel cost (${r.s.price}/L)</td><td>− ${f(r.fuel)}</td></tr>
+  <tr><td>Wear cost (${r.s.wear}/km)</td><td>− ${f(r.wear)}</td></tr>
+  <tr><td><b>Net profit</b></td><td class="t-${r.cls}">${rng(r.pMin,r.pMax)}</td></tr>
+  <tr><td>Profit per km</td><td>${rng(r.kMin,r.kMax)}</td></tr></table>
+  <div class="acts"><button class="ghost" id="mt">Mark as ${r.status==='accepted'?'skipped':'accepted'}</button><button class="skp" id="md">Delete</button></div>`;
+  $('modal').classList.add('on');
+}
+const close=()=>{$('modal').classList.remove('on');sel=null};
+$('modal').addEventListener('click',e=>{
+  if(e.target.id==='modal'||e.target.id==='mx')return close();
+  if(!sel)return;
+  if(e.target.id==='mt'){sel.status=sel.status==='accepted'?'skipped':'accepted';put('rt_rides',rides);render();close()}
+  if(e.target.id==='md'){rides=rides.filter(x=>x!==sel);put('rt_rides',rides);render();close()}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+$('list').addEventListener('click',e=>{const b=e.target.closest('.item');if(b)open(b.dataset.id)});
+$('bClr').onclick=()=>{if(rides.length&&confirm('Delete all saved rides?')){rides=[];put('rt_rides',rides);render()}};
+$('bAcc').onclick=()=>saveRide('accepted');
+$('bSkp').onclick=()=>saveRide('skipped');
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==='t-'+b.dataset.tab));
+  if(b.dataset.tab==='calc')$('fare').focus();
+});
+const order=['fare','pick','trip','extra'];
+order.forEach((k,i)=>{
+  $(k).addEventListener('input',calc);
+  $(k).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();(order[i+1]?$(order[i+1]).focus():$(k).blur())}});
+});
+
+function setLock(v){locked=v;KEYS.forEach(k=>$(k).disabled=v);$('bEdit').textContent=v?'Edit':'Save & lock'}
+$('bEdit').onclick=()=>{if(locked)setLock(false);else{const s=S();KEYS.forEach(k=>$(k).value=s[k]);put('rt_set',s);setLock(true);calc()}};
+
+let saved=get('rt_set',null);
+if(saved&&saved.fee!==undefined&&saved.feeMin===undefined){saved.feeMin=saved.feeMax=saved.fee}
+rides=get('rt_rides',[]).map(norm);
+if(saved){KEYS.forEach(k=>$(k).value=saved[k]??0);setLock(true)}
+else{KEYS.forEach(k=>$(k).value=['wear','feeMin','feeMax'].includes(k)?'0':'');setLock(false)}
+render();calc();
+</script>
+</body>
+</html>
